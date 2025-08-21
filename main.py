@@ -2,24 +2,24 @@ import matplotlib.pyplot as plt
 import sys
 import math
 
-X = 5
-Y = 5
+X = 10
+Y = 10
 
-RANGE_X = 25
-RANGE_Y = 25
+RANGE_X = 50
+RANGE_Y = 50
 
-PRECISION = 20
+PRECISION = 10
 
 DEPTH = 100
 
 #t = "normal"
 #args = {}
 
-#t = "ab"
-#args = {"a": 0.8, "b": 0.8} # Argumentos alfa-beta
+t2 = "ab"
+args2 = {"a": 0.8, "b": 0.8} # Argumentos alfa-beta
 
 #t = "ar"
-#args = {"a": 0.8, "r": 0.5}
+#args = {"a": 0.7, "r": 0.5}
 
 #t = "ar2"
 #args = {"a": 0.8, "r1": 0.5, "r2": 0.8}
@@ -113,8 +113,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == "full":
 
     plt.show()
 
-#elif sys.argv[1] == "border"
-else:
+elif sys.argv[1] == "border":
     border_x = []
     border_y = []
 
@@ -147,4 +146,44 @@ else:
         border_y.append(y)
     
     plt.scatter(border_x, border_y, s=0.1)
+    plt.show()
+else:
+    dom_x = []
+    dom_y = []
+    dl_x = []
+    dl_y = []
+    ld_x = []
+    ld_y = []
+    low_x = []
+    low_y = []
+
+    ca1, ca2 = transform(t2, args2, X, Y)
+    basea = Cost(ca1, ca2)
+
+    for i in range(RANGE_X*PRECISION):
+        for j in range(RANGE_Y*PRECISION):
+            d1, d2 = transform(t, args, i/PRECISION, j/PRECISION)
+            da1, da2 = transform(t2, args2, i/PRECISION, j/PRECISION)
+            point = Cost(d1, d2)
+            pointa = Cost(da1, da2)
+            if base.weakly_dominates(point):
+                if basea.weakly_dominates(pointa):
+                    dom_x.append(i/PRECISION)
+                    dom_y.append(j/PRECISION)
+                else:
+                    dl_x.append(i/PRECISION)
+                    dl_y.append(j/PRECISION)
+            else:
+                if basea.weakly_dominates(pointa):
+                    ld_x.append(i/PRECISION)
+                    ld_y.append(j/PRECISION)
+                else:
+                    low_x.append(i/PRECISION)
+                    low_y.append(j/PRECISION)
+
+    plt.scatter(dom_x, dom_y, c="blue", s=0.1)
+    plt.scatter(dl_x, dl_y, c="purple", s=0.1)
+    plt.scatter(ld_x, ld_y, c="green", s=0.1)
+    plt.scatter(low_x, low_y, color="yellow", s=0.1)
+
     plt.show()
