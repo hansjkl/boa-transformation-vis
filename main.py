@@ -27,11 +27,11 @@ args = {"type": "func", "a": 0.8, "b": 0.8}
 #t = "epsilon" # Poda epsilon
 #args = {"type": "rel", "e": 0.3}
 
-#t = "epsilon-par" # Poda epsilon-pareto
+#t = "epsilon-con" # Poda epsilon-consistente
 #args = {"type": "rel", "e": 0.3}
 
 t2 = "normal"
-args2 = {"type": "func", }
+args2 = {"type": "func"}
 
 class Cost:
     def __init__(self, c1, c2):
@@ -45,17 +45,17 @@ class Cost:
         return self.c1 <= other.c1 and self.c2 <= other.c2
     
     def epsilon_dominates(self, other, epsilon):
-        return (self.c1 - self.c2*epsilon <= other.c1 and self.c2*(1-epsilon) < other.c2) or (
-            self.c1 - self.c2*epsilon < other.c1 and self.c2*(1-epsilon) <= other.c2
+        return (self.c1 <= other.c1*(1 + epsilon) and self.c2 < other.c2*(1 + epsilon)) or (
+            self.c1 < other.c1*(1 + epsilon) and self.c2 <= other.c2*(1 + epsilon)
         )
     
-    def epsilon_par_dominates(self, other, epsilon):
-        if other.c1 < self.c1 - self.c2*epsilon:
+    def epsilon_con_dominates(self, other, epsilon):
+        if other.c1 < self.c1 - self.c1*epsilon:
             return False
         if other.c1 <= self.c1:
-            return other.c2 > self.c2 + self.c2*(self.c1-other.c1)/(self.c2)
-        if other.c1 < self.c1 + self.c2*epsilon:
-            return other.c2 > self.c2 - self.c2*(other.c1-self.c1)/(self.c2)
+            return other.c2 > self.c2 + self.c2*(self.c1-other.c1)/(self.c1)
+        if other.c1 < self.c1 + self.c1*epsilon:
+            return other.c2 > self.c2 - self.c2*(other.c1-self.c1)/(self.c1)
         return other.c2 > self.c2*(1-epsilon)
 
 
@@ -96,8 +96,8 @@ def dom_args(u: Cost, v: Cost, t: str, args: list):
     match t:
         case "epsilon":
             return u.epsilon_dominates(v, args["e"])
-        case "epsilon-par":
-            return u.epsilon_par_dominates(v, args["e"])
+        case "epsilon-con":
+            return u.epsilon_con_dominates(v, args["e"])
     
 
 def binary_search_x(base: Cost, t, args: list, x: float, low: float, high: float, depth: int):
