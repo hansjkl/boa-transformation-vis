@@ -13,7 +13,7 @@ PRECISION = 10
 DEPTH = 100
 
 #t = "normal"
-#args = {"type": "func", }
+#args = {"type": "func"}
 
 t = "ab" # Transformación alfa-beta
 args = {"type": "func", "a": 0.8, "b": 0.8}
@@ -28,7 +28,7 @@ args = {"type": "func", "a": 0.8, "b": 0.8}
 #args = {"type": "rel", "e": 0.3}
 
 #t = "epsilon-con" # Poda epsilon-consistente
-#args = {"type": "rel", "e": 0.3}
+#args = {"type": "rel", "e": 0.3, "m": 1}
 
 t2 = "normal"
 args2 = {"type": "func"}
@@ -39,23 +39,23 @@ class Cost:
         self.c2 = c2
 
     def dominates(self, other):
-        return self.c1 < other.c1 or self.c2 < other.c2 and self.weakly_dominates(other)
+        return (self.c1 < other.c1 or self.c2 < other.c2) and self.weakly_dominates(other)
     
     def weakly_dominates(self, other):
         return self.c1 <= other.c1 and self.c2 <= other.c2
     
-    def epsilon_dominates(self, other, epsilon):
+    def epsilon_dominates(self, other, epsilon: float):
         return (self.c1 <= other.c1*(1 + epsilon) and self.c2 < other.c2*(1 + epsilon)) or (
             self.c1 < other.c1*(1 + epsilon) and self.c2 <= other.c2*(1 + epsilon)
         )
     
-    def epsilon_con_dominates(self, other, epsilon):
-        if other.c1 < self.c1 - self.c1*epsilon:
+    def epsilon_con_dominates(self, other, epsilon: float, m: float):
+        if other.c1 < self.c1 - self.c2*epsilon/m:
             return False
         if other.c1 <= self.c1:
-            return other.c2 > self.c2 + self.c2*(self.c1-other.c1)/(self.c1)
-        if other.c1 < self.c1 + self.c1*epsilon:
-            return other.c2 > self.c2 - self.c2*(other.c1-self.c1)/(self.c1)
+            return other.c2 > self.c2 + (self.c1-other.c1)*m
+        if other.c1 < self.c1 + self.c2*epsilon/m:
+            return other.c2 > self.c2 - (other.c1-self.c1)*m
         return other.c2 > self.c2*(1-epsilon)
 
 
@@ -97,7 +97,7 @@ def dom_args(u: Cost, v: Cost, t: str, args: list):
         case "epsilon":
             return u.epsilon_dominates(v, args["e"])
         case "epsilon-con":
-            return u.epsilon_con_dominates(v, args["e"])
+            return u.epsilon_con_dominates(v, args["e"], args["m"])
     
 
 def binary_search_x(base: Cost, t, args: list, x: float, low: float, high: float, depth: int):

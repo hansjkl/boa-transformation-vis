@@ -45,7 +45,7 @@ Para todos los ejemplos se utiliza **X** = **Y** = 10, **RANGE_X** = **RANGE_Y**
 ### Poda epsilon (epsilon = 0.3)
 ![](examples/eps.png)
 
-### Poda epsilon-consistente (epsilon = 0.3)
+### Poda epsilon-consistente (epsilon = 0.3, m = 1)
 ![](examples/eps-con.png)
 
 ### Modo **border** con alfa-r (alfa = 0.8, r = 0.5, depth = 100)
